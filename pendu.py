@@ -1,20 +1,51 @@
 #importation des modules
 from random import randrange
 
-#définition de la fonction
-# def pendu(lettre, nb):
-#     #boucle de vérification de la lettre dans le mot
-#     if lettre in soluce:
-#         print("La lettre", lettre, "est dans le mot.")
-#         #boucle de remplacement des "-" par la lettre
-#         for i in range(len(soluce)):
-#             if soluce[i] == lettre:
-#                 mot = mot[:i] + lettre + mot[i+1:]
-#     else:
-#         print("La lettre", lettre, "n'est pas dans le mot.")
-#         nb -= 1
-#     return mot, nb
-#Pas réussi
+################# Définition des fonctions #################
+#fonction pour mettre en minuscule et enlever les accents
+def case(phrase):
+    alphabet = 'abcdefghijklmnopqrstuvwxyzaaeeeeiiABCDEFGHIJKLMNOPQRSTUVWXYZàâéèêëîï'
+    result = ""
+    for x in phrase:
+        if x not in alphabet or alphabet.index(x)<=34:  #cherche dans l'alphabet si la lettre est en minuscule
+            result += x
+        elif x in alphabet and alphabet.index(x)>34:   #cherche dans l'alphabet si la lettre est en majuscule
+            result += alphabet[alphabet.index(x)-34]
+    return result
+
+#####     définition de la fonction de vérification de la lettre dans le mot #####
+def pendu(lettre):
+    global mot, soluce, nb_essais
+    #boucle de vérification de la lettre dans le mot
+    if lettre in soluce:
+        print("-------------------------")
+        print("\nLa lettre", lettre, "est dans le mot.")
+        #boucle de remplacement des "-" par la lettre
+        for i in range(len(soluce)):
+            if soluce[i] == lettre:
+                mot = mot[:i] + lettre + mot[i+1:]
+    else:
+        print("-------------------------")
+        print("\nLa lettre", lettre, "n'est pas dans le mot.")
+        nb_essais -= 1
+    return mot, nb_essais
+
+#####      fonction de victoire
+def victoire(lettreutilisee, soluce, nb_essais):
+    print("\n--------------------")
+    print("Bravo ! Vous avez gagné !")
+    print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
+    print("Le mot était", soluce)
+    print ("Vous avez trouvé en", len(lettreutilisee), "coups.")
+    print ("Il vous restait", nb_essais, "vies.")
+
+######     fonction de défaite
+def defaite(lettreutilisee,soluce):
+    print("\n--------------------")
+    print("Vous avez perdu !")
+    print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
+    print("Le mot était", soluce)
+##################################################################
 
 ###     message de début   ###
 print("Bonjour!\nBienvenue dans le jeu du pendu !")
@@ -31,6 +62,8 @@ while choix == "o":
 
     ###     choix d'un mot au hasard dans le dico   ###
     soluce = liste[randrange(len(liste))]
+    soluce = case(soluce)
+
     #boucle de transformation du mot en "_"
     mot = "-" * (len(soluce))
     print(mot)
@@ -44,7 +77,7 @@ while choix == "o":
         inf = input("choisissez si vous voulez afficher les informations du jeu ou directement choisir la difficulté \n'i' pour les informations\n'd' pour les difficultées : ")
     
     while inf == "i":
-        print("\nLe but du jeu est de deviner le mot mystère en trouvant toutes les lettres qui le compose (accents compris).")
+        print("\nLe but du jeu est de deviner le mot mystère en trouvant toutes les lettres qui le compose (accents non compris).")
         print("En mode facile, vous avez le droit à 10 erreurs pour trouver le mot mystère.")
         print("En mode intérmédiaire, vous avez le droit à 7 erreurs.")
         print("En mode expert, vous avez le droit à 5 erreurs\nDe plus les lettres déjà utilisées ne sont pas affichées dans ce mode.")
@@ -66,7 +99,7 @@ while choix == "o":
     #Difficulté facile
     if diff == 1 :
         nb_essais = 10
-        lettreutilisee = []
+        lettreutilisee = ""
         print("\n--------------------")
         print("Vous avez choisi la difficulté facile. Vous avez", nb_essais, "essais.")
         #boucle du jeu
@@ -79,43 +112,26 @@ while choix == "o":
             while len(lettre) != 1 or lettre.isalpha() == False:
                 print("Veuillez saisir une lettre et seulement une (pas un chiffre).")
                 lettre = input("Choisissez une lettre : ")
-            lettreutilisee.append(lettre)
+            lettreutilisee = lettreutilisee + lettre + ", "
 
             ###### fonction pendu ######
-            #mot, nb_essais = pendu(lettre, nb_essais)
-            #boucle de vérification de la lettre dans le mot
-            if lettre in soluce:
-                print("--------------------")
-                print("\nLa lettre", lettre, "est dans le mot.")
-                #boucle de remplacement des "-" par la lettre
-                for i in range(len(soluce)):
-                    if soluce[i] == lettre:
-                        mot = mot[:i] + lettre + mot[i+1:]
-            else:
-                print("--------------------")
-                print("\nLa lettre", lettre, "n'est pas dans le mot.")
-                nb_essais -= 1
+            pendu(lettre)
+            ############################
+
             print ("Il vous reste", nb_essais, "essais.")
             print ("lettres déjà utilisées :", lettreutilisee)
 
         #boucle de vérification de victoire
         if mot == soluce:
-            print("\n--------------------")
-            print("Bravo ! Vous avez gagné !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
-            print ("Vous avez trouvé en", len(lettreutilisee), "coups.")
-            print ("Il vous restait", nb_essais, "vies.")
+            victoire(lettreutilisee, soluce, nb_essais)
+        
         elif nb_essais == 0:
-            print("\n--------------------")
-            print("Vous avez perdu !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
+            defaite(lettreutilisee,soluce)
 
     #Difficulté moyenne
     elif diff == 2:
         nb_essais = 7
-        lettreutilisee = []
+        lettreutilisee = ""
         print("\n--------------------")
         print("Vous avez choisi la difficulté intermédiaire. Vous avez", nb_essais, "essais.")
         #boucle du jeu
@@ -123,44 +139,28 @@ while choix == "o":
             print ("le mot contient ", len(soluce), "lettres")
             print (mot)
             lettre = input("Choisissez une lettre : ")
-            lettreutilisee.append(lettre)
             #boucle de vérification d'erreur de saisie
             while len(lettre) != 1 or lettre.isalpha() == False:
                 print("Veuillez saisir une lettre et seulement une (pas un chiffre).")
                 lettre = input("Choisissez une lettre : ")
-            #boucle de vérification de la lettre dans le mot
-            if lettre in soluce:
-                print("--------------------")
-                print("\nLa lettre", lettre, "est dans le mot.")
-                #boucle de remplacement des "-" par la lettre
-                for i in range(len(soluce)):
-                    if soluce[i] == lettre:
-                        mot = mot[:i] + lettre + mot[i+1:]
-            else:
-                print("--------------------")
-                print("\nLa lettre", lettre, "n'est pas dans le mot.")
-                nb_essais -= 1
+            lettreutilisee = lettreutilisee + lettre + ", "
+            ###### fonction pendu ######
+            pendu(lettre)
+            ############################
             print ("Il vous reste", nb_essais, "essais.")
             print ("lettres déjà utilisées :", lettreutilisee)
 
         #boucle de vérification de victoire
         if mot == soluce:
-            print("\n--------------------")
-            print("Bravo ! Vous avez gagné !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
-            print ("Vous avez trouvé en", len(lettreutilisee), "coups.")
-            print ("Il vous restait", nb_essais, "vies.")
+            victoire(lettreutilisee, soluce, nb_essais)
+
         elif nb_essais == 0:
-            print("\n--------------------")
-            print("Vous avez perdu !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
+            defaite(lettreutilisee,soluce)
 
     #Difficulté expert
     elif diff == 3:
         nb_essais = 5
-        lettreutilisee = []
+        lettreutilisee = ""
         print("\n--------------------")
         print("Vous avez choisi la difficulté expert. Vous avez", nb_essais, "essais.")
         print("dans cette difficulté, les lettres déjà utilisées ne sont pas affichées.")
@@ -169,44 +169,28 @@ while choix == "o":
             print ("le mot contient ", len(soluce), "lettres")
             print (mot)
             lettre = input("Choisissez une lettre : ")
-            lettreutilisee.append(lettre)
             #boucle de vérification d'erreur de saisie
             while len(lettre) != 1 or lettre.isalpha() == False:
                 print("Veuillez saisir une lettre et seulement une (pas un chiffre).")
                 lettre = input("Choisissez une lettre : ")
-            #boucle de vérification de la lettre dans le mot
-            if lettre in soluce:
-                print("--------------------")
-                print("\nLa lettre", lettre, "est dans le mot.")
-                #boucle de remplacement des "-" par la lettre
-                for i in range(len(soluce)):
-                    if soluce[i] == lettre:
-                        mot = mot[:i] + lettre + mot[i+1:]
-            else:
-                print("--------------------")
-                print("\nLa lettre", lettre, "n'est pas dans le mot.")
-                nb_essais -= 1
+            lettreutilisee = lettreutilisee + lettre + ", "
+            ###### fonction pendu ######
+            pendu(lettre)
+            ############################
             print ("Il vous reste", nb_essais, "essais.")
 
         #boucle de vérification de victoire
         if mot == soluce:
-            print("\n--------------------")
-            print("Bravo ! Vous avez gagné !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
-            print ("Vous avez trouvé en", len(lettreutilisee), "coups.")
-            print ("Il vous restait", nb_essais, "vies.")
+            victoire(lettreutilisee, soluce, nb_essais)
+
         elif nb_essais == 0:
-            print("\n--------------------")
-            print("Vous avez perdu !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
+            defaite(lettreutilisee,soluce)
 
     #Difficulté extrême
     elif diff == 4:
         mot = " " * (len(soluce))
         nb_essais = 10
-        lettreutilisee = []
+        lettreutilisee = ""
         print("\n--------------------")
         print("Vous avez choisi la difficulté extrême. Vous avez", nb_essais, "essais.")
         print("Cependant, les lettres déjà utilisées ne sont pas affichées.")
@@ -215,38 +199,22 @@ while choix == "o":
         while nb_essais != 0 and mot != soluce:
             print (mot)
             lettre = input("Choisissez une lettre : ")
-            lettreutilisee.append(lettre)
             #boucle de vérification d'erreur de saisie
             while len(lettre) != 1 or lettre.isalpha() == False:
                 print("Veuillez saisir une lettre et seulement une (pas un chiffre).")
                 lettre = input("Choisissez une lettre : ")
-            #boucle de vérification de la lettre dans le mot
-            if lettre in soluce:
-                print("--------------------")
-                print("La lettre", lettre, "est dans le mot.")
-                #boucle de remplacement des "-" par la lettre
-                for i in range(len(soluce)):
-                    if soluce[i] == lettre:
-                        mot = mot[:i] + lettre + mot[i+1:]
-            else:
-                print("--------------------")
-                print("La lettre", lettre, "n'est pas dans le mot.")
-                nb_essais -= 1
+            lettreutilisee = lettreutilisee + lettre + ", "
+            ###### fonction pendu ######
+            pendu(lettre)
+            ############################
             print ("Il vous reste", nb_essais, "essais.")
 
         #boucle de vérification de victoire
         if mot == soluce:
-            print("\n--------------------")
-            print("Bravo ! Vous avez gagné !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
-            print ("Vous avez trouvé en", len(lettreutilisee), "coups.")
-            print ("Il vous restait", nb_essais, "vies.")
+            victoire(lettreutilisee, soluce, nb_essais)
+
         elif nb_essais == 0:
-            print("\n--------------------")
-            print("Vous avez perdu !")
-            print("Vous avez utilisé les lettres suivantes :", lettreutilisee)
-            print("Le mot était", soluce)
+            defaite(lettreutilisee,soluce)
 
 
     ###        Vouloir rejouer ?        ###
